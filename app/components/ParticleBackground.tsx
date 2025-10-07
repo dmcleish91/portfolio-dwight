@@ -20,11 +20,7 @@ class Dot {
   radius: number;
   colour: string;
 
-  constructor(
-    canvasWidth: number,
-    canvasHeight: number,
-    colorDot: string[]
-  ) {
+  constructor(canvasWidth: number, canvasHeight: number, colorDot: string[]) {
     this.x = Math.random() * canvasWidth;
     this.y = Math.random() * canvasHeight;
     this.vx = -0.5 + Math.random();
@@ -33,11 +29,7 @@ class Dot {
     this.colour = colorDot[Math.floor(Math.random() * colorDot.length)];
   }
 
-  create(
-    ctx: CanvasRenderingContext2D,
-    mousePosition: Position,
-    windowSize: number
-  ): void {
+  create(ctx: CanvasRenderingContext2D, mousePosition: Position, windowSize: number): void {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
 
@@ -64,11 +56,7 @@ class Dot {
     }
   }
 
-  line(
-    ctx: CanvasRenderingContext2D,
-    dots: DotsConfig,
-    mousePosition: Position
-  ): void {
+  line(ctx: CanvasRenderingContext2D, dots: DotsConfig, mousePosition: Position): void {
     for (let i = 0; i < dots.nb; i++) {
       for (let j = 0; j < dots.nb; j++) {
         const i_dot = dots.array[i];
