@@ -9,9 +9,11 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
     "@heroicons/react": "^2.2.0",
     "@react-router/node": "^7.9.2",
     "@react-router/serve": "^7.9.2",
+    "@vercel/react-router": "^1.2.3",
     "framer-motion": "^12.23.22",
     "isbot": "^5.1.31",
     "lucide-react": "^0.545.0",
