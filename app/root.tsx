@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { ParticleBackground } from "./components/ParticleBackground";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,7 +28,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
-        <script src="/main.js"></script>
       </body>
     </html>
   );
@@ -38,9 +38,7 @@ export default function App() {
 
   return (
     <>
-      <div className='fixed -z-50'>
-        <canvas className='connecting-dots'></canvas>
-      </div>
+      <ParticleBackground />
 
       <motion.div
         key={location.pathname}

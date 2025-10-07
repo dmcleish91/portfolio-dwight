@@ -1,6 +1,13 @@
 const canvasDots = function () {
+	console.log('[Particle] Initializing canvasDots');
 	const canvas = document.querySelector('canvas');
+	console.log('[Particle] Canvas element found:', canvas);
+	if (!canvas) {
+		console.error('[Particle] Canvas element not found in DOM!');
+		return;
+	}
 	const ctx = canvas.getContext('2d');
+	console.log('[Particle] Canvas context:', ctx);
 	const colorDot = ['rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(255, 184, 28)']; // 80% of dots are green. 20% yellow
 	const color = 'rgb(81, 162, 233)'; // What is this?
 
@@ -194,7 +201,9 @@ const canvasDots = function () {
 };
 
 window.onload = function () {
-
+	console.log('[Particle] window.onload fired');
+	console.log('[Particle] DOM ready state:', document.readyState);
+	console.log('[Particle] Canvas in DOM:', document.querySelector('canvas'));
 	canvasDots();
 };
 
