@@ -1,16 +1,126 @@
 import { useEffect } from 'react';
 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface DotsConfig {
+  nb: number;
+  distance: number;
+  d_radius: number;
+  array: Dot[];
+}
+
+class Dot {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  colour: string;
+
+  constructor(
+    canvasWidth: number,
+    canvasHeight: number,
+    colorDot: string[]
+  ) {
+    this.x = Math.random() * canvasWidth;
+    this.y = Math.random() * canvasHeight;
+    this.vx = -0.5 + Math.random();
+    this.vy = -0.5 + Math.random();
+    this.radius = Math.random() * 1.5;
+    this.colour = colorDot[Math.floor(Math.random() * colorDot.length)];
+  }
+
+  create(
+    ctx: CanvasRenderingContext2D,
+    mousePosition: Position,
+    windowSize: number
+  ): void {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+    const dotDistance = ((this.x - mousePosition.x) ** 2 + (this.y - mousePosition.y) ** 2) ** 0.5;
+    const distanceRatio = dotDistance / (windowSize / 1.7);
+
+    ctx.fillStyle = this.colour.slice(0, -1) + `,${1 - distanceRatio})`;
+    ctx.fill();
+  }
+
+  animate(dots: DotsConfig, canvas: HTMLCanvasElement): void {
+    for (let i = 1; i < dots.nb; i++) {
+      const dot = dots.array[i];
+
+      if (dot.y < 0 || dot.y > canvas.height) {
+        dot.vy = -dot.vy;
+      } else if (dot.x < 0 || dot.x > canvas.width) {
+        dot.vx = -dot.vx;
+      }
+      dot.x += dot.vx;
+      dot.y += dot.vy;
+    }
+  }
+
+  line(
+    ctx: CanvasRenderingContext2D,
+    dots: DotsConfig,
+    mousePosition: Position
+  ): void {
+    for (let i = 0; i < dots.nb; i++) {
+      for (let j = 0; j < dots.nb; j++) {
+        const i_dot = dots.array[i];
+        const j_dot = dots.array[j];
+
+        if (
+          i_dot.x - j_dot.x < dots.distance &&
+          i_dot.y - j_dot.y < dots.distance &&
+          i_dot.x - j_dot.x > -dots.distance &&
+          i_dot.y - j_dot.y > -dots.distance
+        ) {
+          if (
+            i_dot.x - mousePosition.x < dots.d_radius &&
+            i_dot.y - mousePosition.y < dots.d_radius &&
+            i_dot.x - mousePosition.x > -dots.d_radius &&
+            i_dot.y - mousePosition.y > -dots.d_radius
+          ) {
+            ctx.beginPath();
+            ctx.moveTo(i_dot.x, i_dot.y);
+            ctx.lineTo(j_dot.x, j_dot.y);
+
+            const dotDistance = ((i_dot.x - mousePosition.x) ** 2 + (i_dot.y - mousePosition.y) ** 2) ** 0.5;
+            let distanceRatio = dotDistance / dots.d_radius;
+
+            distanceRatio -= 0.3;
+            if (distanceRatio < 0) {
+              distanceRatio = 0;
+            }
+
+            ctx.strokeStyle = `rgb(43, 59, 41, ${1 - distanceRatio})`;
+            ctx.stroke();
+            ctx.closePath();
+          }
+        }
+      }
+    }
+  }
+}
+
 export function ParticleBackground() {
   useEffect(() => {
-    const canvas = document.querySelector('canvas');
+    const canvasElement = document.querySelector<HTMLCanvasElement>('canvas');
 
-    if (!canvas) {
+    if (!canvasElement) {
       return;
     }
 
-    const ctx = canvas.getContext('2d');
+    const canvasContext = canvasElement.getContext('2d');
 
-    if (!ctx) return;
+    if (!canvasContext) return;
+
+    // Type-safe references
+    const canvas = canvasElement;
+    const ctx = canvasContext;
 
     const colorDot = ['rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(0, 119, 73)', 'rgb(255, 184, 28)'];
     const color = 'rgb(81, 162, 233)';
@@ -21,13 +131,13 @@ export function ParticleBackground() {
     ctx.lineWidth = 0.3;
     ctx.strokeStyle = color;
 
-    let mousePosition = {
+    const mousePosition: Position = {
       x: (30 * canvas.width) / 100,
       y: (30 * canvas.height) / 100,
     };
 
     const windowSize = window.innerWidth;
-    let dots;
+    let dots: DotsConfig;
 
     if (windowSize > 1600) {
       dots = {
@@ -73,101 +183,24 @@ export function ParticleBackground() {
       };
     }
 
-    function Dot(this: any) {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-      this.vx = -0.5 + Math.random();
-      this.vy = -0.5 + Math.random();
-      this.radius = Math.random() * 1.5;
-      this.colour = colorDot[Math.floor(Math.random() * colorDot.length)];
-    }
-
-    Dot.prototype = {
-      create: function () {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-
-        const dotDistance = ((this.x - mousePosition.x) ** 2 + (this.y - mousePosition.y) ** 2) ** 0.5;
-        const distanceRatio = dotDistance / (windowSize / 1.7);
-
-        ctx.fillStyle = this.colour.slice(0, -1) + `,${1 - distanceRatio})`;
-        ctx.fill();
-      },
-
-      animate: function () {
-        for (let i = 1; i < dots.nb; i++) {
-          const dot = dots.array[i];
-
-          if (dot.y < 0 || dot.y > canvas.height) {
-            dot.vx = dot.vx;
-            dot.vy = -dot.vy;
-          } else if (dot.x < 0 || dot.x > canvas.width) {
-            dot.vx = -dot.vx;
-            dot.vy = dot.vy;
-          }
-          dot.x += dot.vx;
-          dot.y += dot.vy;
-        }
-      },
-
-      line: function () {
-        for (let i = 0; i < dots.nb; i++) {
-          for (let j = 0; j < dots.nb; j++) {
-            const i_dot = dots.array[i];
-            const j_dot = dots.array[j];
-
-            if (
-              i_dot.x - j_dot.x < dots.distance &&
-              i_dot.y - j_dot.y < dots.distance &&
-              i_dot.x - j_dot.x > -dots.distance &&
-              i_dot.y - j_dot.y > -dots.distance
-            ) {
-              if (
-                i_dot.x - mousePosition.x < dots.d_radius &&
-                i_dot.y - mousePosition.y < dots.d_radius &&
-                i_dot.x - mousePosition.x > -dots.d_radius &&
-                i_dot.y - mousePosition.y > -dots.d_radius
-              ) {
-                ctx.beginPath();
-                ctx.moveTo(i_dot.x, i_dot.y);
-                ctx.lineTo(j_dot.x, j_dot.y);
-
-                const dotDistance = ((i_dot.x - mousePosition.x) ** 2 + (i_dot.y - mousePosition.y) ** 2) ** 0.5;
-                let distanceRatio = dotDistance / dots.d_radius;
-
-                distanceRatio -= 0.3;
-                if (distanceRatio < 0) {
-                  distanceRatio = 0;
-                }
-
-                ctx.strokeStyle = `rgb(43, 59, 41, ${1 - distanceRatio})`;
-                ctx.stroke();
-                ctx.closePath();
-              }
-            }
-          }
-        }
-      },
-    };
-
-    function initDots() {
+    function initDots(): void {
       for (let i = 0; i < dots.nb; i++) {
-        dots.array.push(new (Dot as any)());
+        dots.array.push(new Dot(canvas.width, canvas.height, colorDot));
       }
       dots.array[0].radius = 1.5;
       dots.array[0].colour = '#51a2e9';
     }
 
-    function drawDots() {
+    function drawDots(): void {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < dots.nb; i++) {
-        dots.array[i].create();
+        dots.array[i].create(ctx, mousePosition, windowSize);
       }
-      dots.array[0].line();
-      dots.array[0].animate();
+      dots.array[0].line(ctx, dots, mousePosition);
+      dots.array[0].animate(dots, canvas);
     }
 
-    const handleMouseMove = (parameter: MouseEvent) => {
+    const handleMouseMove = (parameter: MouseEvent): void => {
       mousePosition.x = parameter.pageX;
       mousePosition.y = parameter.pageY - window.scrollY;
 
@@ -179,7 +212,7 @@ export function ParticleBackground() {
       }
     };
 
-    const handleResize = () => {
+    const handleResize = (): void => {
       clearInterval(draw);
       // Re-initialize on resize
       window.location.reload();
