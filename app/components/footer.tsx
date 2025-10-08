@@ -21,9 +21,9 @@ export default function Footer() {
           }}
         />
         <div className='flex flex-row items-center'>
-          <p>2023</p>
+          <p>{new Date().getFullYear()}</p>
           <Heart
-            className='h-4 w-4 cursor-pointer'
+            className='h-4 w-4 cursor-pointer transistion-all duration-300'
             fill={heartColor ? '#FED100' : '#009B3A'}
             onClick={() => setHeartColor((prev) => !prev)}
           />

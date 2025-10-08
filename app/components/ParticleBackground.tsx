@@ -130,54 +130,58 @@ export function ParticleBackground() {
       y: (30 * canvas.height) / 100,
     };
 
-    const windowSize = window.innerWidth;
     let dots: DotsConfig;
+    let windowSize = window.innerWidth;
 
-    // Scale particle count and interaction radius based on viewport to maintain performance
-    if (windowSize > 1600) {
-      dots = {
-        nb: 600,
-        distance: 70,
-        d_radius: 300,
-        array: [],
-      };
-    } else if (windowSize > 1300) {
-      dots = {
-        nb: 575,
-        distance: 60,
-        d_radius: 280,
-        array: [],
-      };
-    } else if (windowSize > 1100) {
-      dots = {
-        nb: 500,
-        distance: 55,
-        d_radius: 250,
-        array: [],
-      };
-    } else if (windowSize > 800) {
-      // Disable line connections on smaller screens to improve performance
-      dots = {
-        nb: 300,
-        distance: 0,
-        d_radius: 0,
-        array: [],
-      };
-    } else if (windowSize > 600) {
-      dots = {
-        nb: 200,
-        distance: 0,
-        d_radius: 0,
-        array: [],
-      };
-    } else {
-      dots = {
-        nb: 100,
-        distance: 0,
-        d_radius: 0,
-        array: [],
-      };
-    }
+    const getDotsConfig = (width: number): DotsConfig => {
+      // Scale particle count and interaction radius based on viewport to maintain performance
+      if (width > 1600) {
+        return {
+          nb: 600,
+          distance: 70,
+          d_radius: 300,
+          array: [],
+        };
+      } else if (width > 1300) {
+        return {
+          nb: 575,
+          distance: 60,
+          d_radius: 280,
+          array: [],
+        };
+      } else if (width > 1100) {
+        return {
+          nb: 500,
+          distance: 55,
+          d_radius: 250,
+          array: [],
+        };
+      } else if (width > 800) {
+        // Disable line connections on smaller screens to improve performance
+        return {
+          nb: 300,
+          distance: 0,
+          d_radius: 0,
+          array: [],
+        };
+      } else if (width > 600) {
+        return {
+          nb: 200,
+          distance: 0,
+          d_radius: 0,
+          array: [],
+        };
+      } else {
+        return {
+          nb: 100,
+          distance: 0,
+          d_radius: 0,
+          array: [],
+        };
+      }
+    };
+
+    dots = getDotsConfig(window.innerWidth);
 
     function initDots(): void {
       for (let i = 0; i < dots.nb; i++) {
@@ -213,9 +217,30 @@ export function ParticleBackground() {
     };
 
     const handleResize = (): void => {
-      clearInterval(draw);
-      // Reload required because particle count and spacing need recalculation
-      window.location.reload();
+      // Update canvas dimensions without reloading
+      canvas.width = document.body.scrollWidth;
+      canvas.height = window.innerHeight;
+
+      // Update windowSize and reconfigure dots based on new viewport width
+      const newWidth = window.innerWidth;
+      windowSize = newWidth;
+      const newConfig = getDotsConfig(newWidth);
+
+      // Update dots configuration without recreating the array
+      dots.nb = newConfig.nb;
+      dots.distance = newConfig.distance;
+      dots.d_radius = newConfig.d_radius;
+
+      // Adjust dot count if needed
+      if (dots.array.length > dots.nb) {
+        // Remove excess dots
+        dots.array.length = dots.nb;
+      } else if (dots.array.length < dots.nb) {
+        // Add more dots
+        while (dots.array.length < dots.nb) {
+          dots.array.push(new Dot(canvas.width, canvas.height, colorDot));
+        }
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
